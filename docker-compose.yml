@@ -1,0 +1,75 @@
+services:
+  # PostgreSQL Database
+  postgresdb:
+    image: postgres:latest
+    container_name: postgresdb
+    environment:
+      POSTGRES_DB: jeekdb
+      POSTGRES_USER: jeekuser
+      POSTGRES_PASSWORD: jeekpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  # Keycloak Authentication Service
+  keycloak:
+    image: keycloak/keycloak:nightly
+    container_name: keycloak-auth
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+      KC_DB: postgresdb
+      KC_DB_URL_HOST: postgresdb
+      KC_DB_URL_PORT: 5432
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: jeek_user
+      KC_DB_PASSWORD: jeek_password
+    command:
+      - start-dev
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - postgresdb
+
+  # Backend Service (Spring Boot)
+  backend:
+    build: 
+      context: ./backend-service
+      dockerfile: Dockerfile
+    container_name: spring-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/jeekdb
+      - SPRING_DATASOURCE_USERNAME=jeekuser
+      - SPRING_DATASOURCE_PASSWORD=jeekpassword
+    ports:
+      - "8081:8080"
+    networks:
+      - app-network
+    depends_on:
+      - postgresdb
+
+  # Frontend Service (Angular)
+  frontend:
+    build: 
+      context: ./frontend-service
+      dockerfile: Dockerfile
+    container_name: angular-frontend
+    ports:
+      - "4200:80"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

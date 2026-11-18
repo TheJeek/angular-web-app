@@ -1,0 +1,75 @@
+.sidebar {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-right: 1px solid #dee2e6;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sidebar-nav {
+  width: 100%;
+}
+
+.sidebar-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav-item {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-nav-link {
+  color: #343a40;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  display: block;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+}
+
+.sidebar-content {
+  padding: 1rem;
+}
+
+.sidebar-content h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.sidebar-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-content li {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-content a {
+  text-decoration: none;
+  color: #666;
+  display: block;
+  padding: 0.5rem;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-content a:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+/* Make sure the sidebar content doesn't overflow when collapsed */
+.sidebar-content {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+

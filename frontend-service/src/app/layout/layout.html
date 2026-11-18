@@ -1,0 +1,16 @@
+<main class="app-container">
+  <header class="app-header">
+    <app-navbar></app-navbar>
+  </header>
+  <div class="app-content">
+    <aside class="app-sidebar" [class.collapsed]="isSidebarCollapsed">
+      <button class="toggle-button" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        {{ isSidebarCollapsed ? '▶' : '◀' }}
+      </button>
+      <app-sidebar></app-sidebar>
+    </aside>
+    <section class="app-main-content">
+      <router-outlet></router-outlet>
+    </section>
+  </div>
+</main>
