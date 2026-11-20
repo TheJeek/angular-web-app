@@ -1,5 +1,4 @@
 services:
-  # PostgreSQL Database
   postgresdb:
     image: postgres:latest
     container_name: postgresdb
@@ -14,7 +13,19 @@ services:
     networks:
       - app-network
 
-  # Keycloak Authentication Service
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://jeekuser:jeekpassword@postgresdb:5432/jeekdb?sslmode=disable
+    ports:
+      - "9187:9187"
+    networks:
+      - app-network
+      - observability
+    depends_on:
+      - postgresdb
+
   keycloak:
     image: keycloak/keycloak:nightly
     container_name: keycloak-auth
@@ -33,10 +44,9 @@ services:
       - "8080:8080"
     networks:
       - app-network
+      - observability
     depends_on:
       - postgresdb
-
-  # Backend Service (Spring Boot)
   backend:
     build: 
       context: ./backend-service
@@ -51,10 +61,10 @@ services:
       - "8081:8080"
     networks:
       - app-network
+      - observability
     depends_on:
       - postgresdb
 
-  # Frontend Service (Angular)
   frontend:
     build: 
       context: ./frontend-service
@@ -64,12 +74,63 @@ services:
       - "4200:80"
     networks:
       - app-network
+      - observability
     depends_on:
       - backend
 
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.5.1
+    container_name: nginx-exporter
+    command:
+      - --nginx.scrape-uri=http://angular-frontend:8080/stub_status
+    ports:
+      - "9113:9113"
+    depends_on:
+      - frontend
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - observability
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    networks:
+      - observability
+
 volumes:
   postgres_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   app-network:
+    driver: bridge
+  observability:
     driver: bridge

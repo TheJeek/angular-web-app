@@ -14,7 +14,7 @@ echo Waiting for database to be ready...
 timeout /t 5 >nul  REM Give it a few seconds to initialize
 
 echo Restarting services...
-docker-compose up --build -d backend frontend
+docker-compose up --build -d backend frontend prometheus grafana postgres-exporter nginx-exporter
 
 echo Cleaning up Dangling docker images...5
 docker image prune -f

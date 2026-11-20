@@ -1,0 +1,23 @@
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['spring-backend:8080']
+    metrics_path: '/actuator/prometheus'
+    honor_labels: true
+    scrape_interval: 15s
+
+  # Nginx serving Angular
+  - job_name: frontend
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+          - nginx-exporter:9113
+
+  - job_name: 'postgresdb'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
